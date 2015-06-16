@@ -1,6 +1,6 @@
 board = []
 coordinate = [[]]
-box = (((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)), ((0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)), ((0, 6), (0, 7), (0, 8), (1, 6), (1, 7), (1, 8), (2, 6), (2, 7), (2, 8)), ((3, 0), (3, 1), (3, 2), (4, 0), (4, 1), (4, 2), (5, 0), (5, 1), (5, 2)), ((3, 3), (3, 4), (3, 5), (4, 3), (4, 4), (4, 5), (5, 3), (5, 4), (5, 5)), ((3, 6), (3, 7), (3, 8), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8)), ((6, 0), (6, 1), (6, 2), (7, 0), (7, 1), (7, 2), (8, 0), (8, 1), (8, 2)), ((6, 3), (6, 4), (6, 5), (7, 3), (7, 4), (7, 5), (8, 3), (8, 4), (8, 5)), ((6, 6), (6, 7), (6, 8), (7, 6), (7, 7), (7, 8), (8, 6), (8, 7), (8, 8)))
+block = (((0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)), ((0, 3), (0, 4), (0, 5), (1, 3), (1, 4), (1, 5), (2, 3), (2, 4), (2, 5)), ((0, 6), (0, 7), (0, 8), (1, 6), (1, 7), (1, 8), (2, 6), (2, 7), (2, 8)), ((3, 0), (3, 1), (3, 2), (4, 0), (4, 1), (4, 2), (5, 0), (5, 1), (5, 2)), ((3, 3), (3, 4), (3, 5), (4, 3), (4, 4), (4, 5), (5, 3), (5, 4), (5, 5)), ((3, 6), (3, 7), (3, 8), (4, 6), (4, 7), (4, 8), (5, 6), (5, 7), (5, 8)), ((6, 0), (6, 1), (6, 2), (7, 0), (7, 1), (7, 2), (8, 0), (8, 1), (8, 2)), ((6, 3), (6, 4), (6, 5), (7, 3), (7, 4), (7, 5), (8, 3), (8, 4), (8, 5)), ((6, 6), (6, 7), (6, 8), (7, 6), (7, 7), (7, 8), (8, 6), (8, 7), (8, 8)))
 
 def initBoard():
     for i in range(9):
@@ -17,7 +17,7 @@ def fill(num, x, y):
         coordinate[0].append([x, y])
     else:
         coordinate[10].append([x, y])
-        coordinate[num][locateBox(x, y)] = [x, y]
+        coordinate[num][locateBlock(x, y)] = [x, y]
 
 def inputNumbers():
     seq = input('please input number sequence:')
@@ -51,13 +51,13 @@ def outputBoard():
         if i % 3 == 2:
             print('-----------------')
 
-def locateBox(x, y):
+def locateBlock(x, y):
     for i in range(9):
-        if (x, y) in box[i]:
+        if (x, y) in block[i]:
             return i
 
-def searchBox(num, x, y):
-    try_ord = box[locateBox(x, y)]
+def searchBlock(num, x, y):
+    try_ord = block[locateBlock(x, y)]
     for [x, y] in try_ord:
         if board[x][y] == num:
             return 1
@@ -76,12 +76,12 @@ def searchCol(num, y):
     return 0
 
 def foundNumber(num, x, y):
-    if searchBox(num, x, y) or searchRow(num, x) or searchCol(num, y):
+    if searchBlock(num, x, y) or searchRow(num, x) or searchCol(num, y):
         return 1
     else:
         return 0
 
-def easyfill():
+def easyfill_BlankBased():
     for [x, y] in coordinate[0]:
         if [x, y] not in coordinate[10]:
             n = 0
@@ -92,13 +92,41 @@ def easyfill():
             if n == 1:
                 fill(temp, x, y)
                 return 1
+    return 0
 
-initBoard()
-initCoordinate()
-if inputNumbers():
+def easyfill_BlockBased():
+    for i in range(1, 10):
+        for j in range(9):
+            if coordinate[i][j] == [9, 9]:
+                n = 0
+                for (x, y) in block[j]:
+                    if not foundNumber(i, x, y) and [x, y] not in coordinate[10]:
+                        n += 1
+                        temp = (x, y)
+                if n == 1:
+                    fill(i, temp[0], temp[1])
+                    return 1
+    return 0
+
+def main():
+    initBoard()
+    initCoordinate()
+    if inputNumbers():
+        outputBoard()
+    else:
+        print('please input the right number sequence')
+    left = 0
+    newLeft = 81 - len(coordinate[10])
+    print(newLeft)
+    while newLeft != left:
+        left = newLeft
+        while easyfill_BlankBased():
+            pass
+        while easyfill_BlockBased():
+            pass
+        newLeft = 81 - len(coordinate[10])
     outputBoard()
-else:
-    print('please input the right number sequence')
-while easyfill():
-    pass
-outputBoard()
+    print(newLeft)
+
+if __name__ == '__main__':
+    main()
