@@ -17,11 +17,8 @@ def initBoard():
         board.append([0, 0, 0 ,0 ,0 ,0 ,0 ,0 ,0])
 
 def initCoordinate():
-    base = []
-    for i in range(9):
-        base.append([9, 9])
     for j in range(10):
-        coordinate.append(base)
+        coordinate.append([[9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9]])
 
 def inputNumbers():
     seq = input('please input number sequence:')
@@ -29,6 +26,7 @@ def inputNumbers():
         n = 0
         for num in seq:
             board[int(n / 9)][n % 9] = int(num)
+            coordinate[int(num)][locateBox(int(n / 9), n % 9)] = [int(n / 9), n % 9]
             n += 1
         return 1
     else:
@@ -65,5 +63,7 @@ def searchRow():
 def searchCol():
     pass
 
+initBoard()
+initCoordinate()
 if inputNumbers():
     outputBoard()
