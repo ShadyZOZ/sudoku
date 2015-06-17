@@ -10,9 +10,11 @@ def initBoard():
 def initCoordinate():
     for j in range(9):
         coordinate.append([[9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9], [9, 9]])
+    coordinate.append([])
 
 def setNumber(num, x, y):
     board[x][y] = num
+    coordinate[10].append([x, y])
     if num == 0:
         coordinate[0].append([x, y])
     else:
@@ -21,7 +23,6 @@ def setNumber(num, x, y):
 
 def inputNumbers():
     seq = input('please input number sequence:')
-    # seq = '000000000240175000060004000300060700050000100000000009079056201020401006400097000'
     if len(seq) == 81:
         n = 0
         for num in seq:
@@ -92,9 +93,9 @@ def easyfill_BlankBased():
         for i in range(1, 10):
             if not foundNumber(i, x, y):
                 n += 1
-                temp = i
+                num = i
         if n == 1:
-            setNumber(temp, x, y)
+            setNumber(num, x, y)
             return 1
     return 0
 
@@ -106,9 +107,9 @@ def easyfill_BlockBased():
                 for (x, y) in block[j]:
                     if not foundNumber(i, x, y) and [x, y] in coordinate[0]:
                         n += 1
-                        temp = (x, y)
+                        ords = (x, y)
                 if n == 1:
-                    setNumber(i, temp[0], temp[1])
+                    setNumber(i, ords[0], ords[1])
                     return 1
     return 0
 
@@ -124,8 +125,8 @@ def fill():
         newLeft = len(coordinate[0])
         if newLeft == 0:
             return 0
-    # tryfill()
-    return 0
+    tryfill()
+    return 1
 
 def tryfill():
     if len(coordinate[0]) == 0:
@@ -137,7 +138,16 @@ def tryfill():
             stack.append([i, [x, y]])
             setNumber(i, x, y)
             return
-    # retry()
+    retry()
+
+def withdrew():
+    coordinate[0] = [coordinate[10][-1]] + coordinate[0]
+    board[coordinate[10][-1][0]][coordinate[10][-1][1]] = 0
+    coordinate[10].remove(coordinate[10][-1])
+
+def drewfill(x, y):
+    while coordinate[10][-1] != [x, y]:
+        withdrew()
 
 def retry():
     if stack[0] == 0:
@@ -145,6 +155,7 @@ def retry():
     num = stack[stack[0]][0]
     x = stack[stack[0]][1][0]
     y = stack[stack[0]][1][1]
+    drewfill(x, y)
     coordinate[num].insert(locateBlock(x, y), [x, y])
     coordinate[0].append([x, y])
     for i in range(num, 9):
@@ -155,6 +166,7 @@ def retry():
     board[x][y] = 0
     stack.remove(stack[stack[0]])
     stack[0] -= 1
+    withdrew()
 
 def main():
     initBoard()
@@ -162,7 +174,6 @@ def main():
     if inputNumbers():
         while fill():
             pass
-        fill()
         outputBoard()
     else:
         print('please input the right number sequence')
