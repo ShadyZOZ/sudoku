@@ -21,12 +21,18 @@ def setNumber(num, x, y):
 
 def inputNumbers():
     seq = input('please input number sequence:')
+    # seq = '000000000240175000060004000300060700050000100000000009079056201020401006400097000'
     if len(seq) == 81:
         n = 0
         for num in seq:
             x = int(n / 9)
             y = n % 9
             if not foundNumber(int(num), x, y) or num == '0':
+                board[x][y] = int(num)
+                if num == '0':
+                    coordinate[0].append([x, y])
+                else:
+                    coordinate[int(num)][locateBlock(x, y)] = [x, y]
                 n += 1
             else:
                 return 0
@@ -82,6 +88,14 @@ def foundNumber(num, x, y):
 
 def easyfill_BlankBased():
     for [x, y] in coordinate[0]:
+        n = 0
+        for i in range(1, 10):
+            if not foundNumber(i, x, y):
+                n += 1
+                temp = i
+        if n == 1:
+            setNumber(temp, x, y)
+            return 1
     return 0
 
 def easyfill_BlockBased():
@@ -90,20 +104,68 @@ def easyfill_BlockBased():
             if coordinate[i][j] == [9, 9]:
                 n = 0
                 for (x, y) in block[j]:
+                    if not foundNumber(i, x, y) and [x, y] in coordinate[0]:
                         n += 1
                         temp = (x, y)
                 if n == 1:
+                    setNumber(i, temp[0], temp[1])
                     return 1
     return 0
 
+def fill():
     left = 0
+    newLeft = len(coordinate[0])
     while newLeft != left:
         left = newLeft
         while easyfill_BlankBased():
             pass
         while easyfill_BlockBased():
             pass
+        newLeft = len(coordinate[0])
+        if newLeft == 0:
+            return 0
+    # tryfill()
+    return 0
 
+def tryfill():
+    if len(coordinate[0]) == 0:
+        return
+    [x, y] = coordinate[0][0]
+    for i in range(1, 10):
+        if not foundNumber(i, x, y):
+            stack[0] += 1
+            stack.append([i, [x, y]])
+            setNumber(i, x, y)
+            return
+    # retry()
+
+def retry():
+    if stack[0] == 0:
+        return
+    num = stack[stack[0]][0]
+    x = stack[stack[0]][1][0]
+    y = stack[stack[0]][1][1]
+    coordinate[num].insert(locateBlock(x, y), [x, y])
+    coordinate[0].append([x, y])
+    for i in range(num, 9):
+        if not foundNumber(i, x, y):
+            stack[stack[0]][0] = i
+            setNumber(i, x, y)
+            return
+    board[x][y] = 0
+    stack.remove(stack[stack[0]])
+    stack[0] -= 1
+
+def main():
+    initBoard()
+    initCoordinate()
+    if inputNumbers():
+        while fill():
+            pass
+        fill()
+        outputBoard()
+    else:
+        print('please input the right number sequence')
 
 if __name__ == '__main__':
     main()
